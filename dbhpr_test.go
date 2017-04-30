@@ -83,3 +83,19 @@ func Test_Query(t *testing.T) {
 	}
 	t.Log(string(bs))
 }
+
+func Test_QueryPage(t *testing.T) {
+	page := NewPage(1, 3)
+
+	err := QueryPage(page, "select name,username from user where id>? order by id desc", 1)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	bs, err := json.Marshal(page)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	t.Log(string(bs))
+}

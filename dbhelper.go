@@ -133,7 +133,7 @@ func (h *DBHelper) QueryPage(page *Page, sql string, args ...interface{}) error 
 
 	//sql limit
 	if !strings.Contains(strings.ToUpper(sql), "LIMIT") {
-		sql += fmt.Sprintf("%s limit %d,%d", sql, page.StartRow(), page.PageSize)
+		sql = fmt.Sprintf("%s limit %d,%d", sql, page.StartRow(), page.PageSize)
 	} else {
 		return errors.New("QueryPage [" + sql + "] contains limit")
 	}
