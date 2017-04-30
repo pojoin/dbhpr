@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"reflect"
 	"testing"
+	"time"
 
 	_ "github.com/go-sql-driver/mysql"
 )
@@ -28,22 +29,13 @@ func Test_Get(t *testing.T) {
 		t.Log(*i)
 	}
 
-	id, err := row.GetInt64("id")
-	if err != nil {
-		t.Error(err)
-	}
+	id, _ := row["id"].(int)
 	t.Log("id = ", id)
 
-	state, err := row.GetInt64("state")
-	if err != nil {
-		t.Error(err)
-	}
+	state, _ := row["state"].(int)
 	t.Log("state = ", state)
 
-	utime, err := row.GetDate("utime")
-	if err != nil {
-		t.Error(err)
-	}
+	utime, _ := row["utime"].(time.Time)
 	t.Log("utime = ", utime)
 
 	bs, err := json.Marshal(&row)
@@ -67,25 +59,19 @@ func Test_GetUser(t *testing.T) {
 			t.Log(string(names))
 		}
 	}
-	name, err := row.GetString("name")
-	if err != nil {
-		t.Error(err)
-	}
+	name, _ := row["name"].(string)
 	t.Log("name=", name)
 
-	userid, err := row.GetInt64("id")
-	if err != nil {
-		t.Error(err)
-	}
+	userid, _ := row["id"].(int64)
 	t.Log("userid = ", userid)
 	bs, _ := json.Marshal(row)
 	t.Log(string(bs))
-	email, _ := row.GetString("email")
+	email, _ := row["email"].(string)
 	t.Log("email = ", email)
 }
 
 func Test_Query(t *testing.T) {
-	rows, err := Query("select * from user where id=?", 1)
+	rows, err := Query("select * from user where id>?", 0)
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -4,12 +4,9 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"log"
 )
 
 var dbHive map[string]*sql.DB = make(map[string]*sql.DB)
-
-var logger *log.Logger
 
 func NewDB(dbname, driverName, url string) error {
 	db, err := sql.Open(driverName, url)
@@ -49,4 +46,9 @@ func Query(sql string, args ...interface{}) ([]Row, error) {
 	h := NewHelper("default")
 	rows, err := h.Query(sql, args...)
 	return rows, err
+}
+
+func QueryPage(page *Page, sql string, args ...interface{}) error {
+	h := NewHelper("default")
+	return h.QueryPage(page, sql, args...)
 }
