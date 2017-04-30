@@ -1,7 +1,6 @@
 package dbhpr
 
 import (
-	"errors"
 	"reflect"
 	"strings"
 )
@@ -46,6 +45,18 @@ func (h *DBHelper) Get(sql string, args ...interface{}) (Row, error) {
 	if !strings.Contains(strings.ToLower(sql), "limit") {
 		sql += " limit 1 "
 	}
+
+	rows, err := h.Query(sql, args...)
+	if err != nil {
+		return nil, err
+	}
+	if len(rows) == 0 {
+		return nil, err
+	}
+	return rows[0], nil
+}
+
+func (h *DBHelper) Query(sql string, args ...interface{}) ([]Row, error) {
 	stmt, err := dbHive[h.dbname].Prepare(sql)
 	if err != nil {
 		return nil, err
@@ -56,25 +67,26 @@ func (h *DBHelper) Get(sql string, args ...interface{}) (Row, error) {
 		return nil, err
 	}
 	defer rows.Close()
-	if !rows.Next() {
-		return nil, errors.New("no result")
-	}
 	columnTypes, err := rows.ColumnTypes()
 	if err != nil {
 		return nil, err
 	}
-	row := make(map[string]interface{})
-	values := make([]interface{}, 0, len(columnTypes))
-	for _, t := range columnTypes {
-		values = append(values, reflect.New(t.ScanType()).Interface())
+	results := make([]Row, 0)
+	for rows.Next() {
+		row := make(map[string]interface{})
+		values := make([]interface{}, 0, len(columnTypes))
+		for _, t := range columnTypes {
+			//fmt.Println("name=", t.Name(), ",type=", t.ScanType(), ",databaseTypeName=", t.DatabaseTypeName())
+			values = append(values, reflect.New(t.ScanType()).Interface())
+		}
+		err := rows.Scan(values...)
+		if err != nil {
+			return nil, err
+		}
+		for i, t := range columnTypes {
+			row[t.Name()] = values[i]
+		}
+		results = append(results, row)
 	}
-	rows.Scan(values...)
-	for i, t := range columnTypes {
-		row[t.Name()] = values[i]
-	}
-	return row, nil
-}
-
-func (h *DBHelper) Query(sql string, args ...interface{}) ([]Row, error) {
-	return nil, nil
+	return results, nil
 }

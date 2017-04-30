@@ -1,6 +1,10 @@
 package dbhpr
 
-import "log"
+import (
+	"errors"
+	"fmt"
+	"time"
+)
 
 type Row map[string]interface{}
 
@@ -12,47 +16,65 @@ type Helper interface {
 	Query(sql string, args ...interface{}) ([]Row, error)
 }
 
-func (r Row) GetInt64(col string) int64 {
+func (r Row) GetInt64(col string) (int64, error) {
 	if cv, ok := r[col]; ok {
 		if cvptr, ok := cv.(*interface{}); ok {
 			if i, ok := (*cvptr).(int64); ok {
-				return i
+				return i, nil
 			} else {
-				log.Printf("column [%s] type is not int64\n", col)
-				return 0
+				return 0, errors.New(fmt.Sprintf("column [%s] type is not int64\n", col))
 			}
 		} else {
-			log.Printf("column [%s] type is not *interface{}\n", col)
-			return 0
+			err_msg := fmt.Sprintf("column [%s] type is not *interface{}\n", col)
+			return 0, errors.New(err_msg)
 		}
-	} else {
-		log.Printf("can not found column [%s]\n", col)
-		return 0
 	}
-	return 0
+	err_msg := fmt.Sprintf("can not found column [%s]\n", col)
+	return 0, errors.New(err_msg)
 }
 
-func (r Row) GetBytes(col string) []byte {
+func (r Row) GetBytes(col string) ([]byte, error) {
 	if cv, ok := r[col]; ok {
 		if cvprt, ok := cv.(*interface{}); ok {
 			if bs, ok := (*cvprt).([]byte); ok {
-				return bs
+				return bs, nil
 			} else {
-				log.Printf("column [%s] type is not []byte\n", col)
-				return nil
+				err_msg := fmt.Sprintf("column [%s] type is not []byte\n", col)
+				return nil, errors.New(err_msg)
 			}
 		} else {
-			log.Printf("column [%s] type is not *interface{}\n", col)
-			return nil
+			err_msg := fmt.Sprintf("column [%s] type is not *interface{}\n", col)
+			return nil, errors.New(err_msg)
 		}
 	}
-	log.Printf("can not found column [%s]\n", col)
-	return nil
+	err_msg := fmt.Sprintf("can not found column [%s]\n", col)
+	return nil, errors.New(err_msg)
 }
 
-func (r Row) GetString(col string) string {
-	if r := r.GetBytes(col); r != nil {
-		return string(r)
+func (r Row) GetString(col string) (string, error) {
+	bs, err := r.GetBytes(col)
+	if err != nil {
+		return "", err
 	}
-	return ""
+	return string(bs), err
 }
+
+func (r Row) GetDate(col string) (time.Time, error) {
+	if cv, ok := r[col]; ok {
+		if cvptr, ok := cv.(*interface{}); ok {
+			if dt, ok := (*cvptr).(time.Time); ok {
+				return dt, nil
+			} else {
+				err_msg := fmt.Sprintf("column [%s] type is not time.Time\n", col)
+				return time.Now(), errors.New(err_msg)
+			}
+		} else {
+			err_msg := fmt.Sprintf("column [%s] type is not *interface{}\n", col)
+			return time.Now(), errors.New(err_msg)
+		}
+	}
+	err_msg := fmt.Sprintf("can not found column [%s]\n", col)
+	return time.Now(), errors.New(err_msg)
+}
+
+//func (r Row) MarshalJSON() ([]byte, error) { }

@@ -28,11 +28,23 @@ func Test_Get(t *testing.T) {
 		t.Log(*i)
 	}
 
-	id := row.GetInt64("id")
+	id, err := row.GetInt64("id")
+	if err != nil {
+		t.Error(err)
+	}
 	t.Log("id = ", id)
 
-	state := row.GetInt64("state")
+	state, err := row.GetInt64("state")
+	if err != nil {
+		t.Error(err)
+	}
 	t.Log("state = ", state)
+
+	utime, err := row.GetDate("utime")
+	if err != nil {
+		t.Error(err)
+	}
+	t.Log("utime = ", utime)
 
 	bs, err := json.Marshal(&row)
 	if err != nil {
@@ -55,6 +67,33 @@ func Test_GetUser(t *testing.T) {
 			t.Log(string(names))
 		}
 	}
-	name := row.GetString("name")
+	name, err := row.GetString("name")
+	if err != nil {
+		t.Error(err)
+	}
 	t.Log("name=", name)
+
+	userid, err := row.GetInt64("id")
+	if err != nil {
+		t.Error(err)
+	}
+	t.Log("userid = ", userid)
+	bs, _ := json.Marshal(row)
+	t.Log(string(bs))
+	email, _ := row.GetString("email")
+	t.Log("email = ", email)
+}
+
+func Test_Query(t *testing.T) {
+	rows, err := Query("select * from user where id=?", 1)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Log(rows)
+	bs, err := json.Marshal(rows)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	t.Log(string(bs))
 }

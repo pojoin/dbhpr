@@ -44,3 +44,9 @@ func Get(sql string, args ...interface{}) (Row, error) {
 	row, err := h.Get(sql, args...)
 	return row, err
 }
+
+func Query(sql string, args ...interface{}) ([]Row, error) {
+	h := NewHelper("default")
+	rows, err := h.Query(sql, args...)
+	return rows, err
+}
