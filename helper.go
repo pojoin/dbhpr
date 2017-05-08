@@ -43,6 +43,7 @@ type Helper interface {
 	Update(sql string, args ...interface{}) (rowsAffected int64, err error)
 	Delete(sql string, args ...interface{}) (rowsAffected int64, err error)
 	Count(sql string, args ...interface{}) (c int64, err error)
+	IsExists(sql string, args ...interface{}) (ok bool, err error)
 	Get(sql string, args ...interface{}) (Row, error)
 	Query(sql string, args ...interface{}) ([]Row, error)
 	QueryPage(page *Page, sql string, args ...interface{}) error

@@ -108,6 +108,17 @@ func (h *DBHelper) Query(sql string, args ...interface{}) ([]Row, error) {
 	return results, nil
 }
 
+func (h *DBHelper) IsExists(sql string, args ...interface{}) (ok bool, err error) {
+	c, err := h.Count(sql, args...)
+	if err != nil {
+		return false, err
+	}
+	if c > 0 {
+		return true, err
+	}
+	return false, err
+}
+
 func (h *DBHelper) Count(sql string, args ...interface{}) (c int64, err error) {
 	if tmpsql := strings.ToUpper(sql); !strings.Contains(tmpsql, "COUNT") {
 		if fromIndex := strings.Index(tmpsql, "FROM"); fromIndex > 0 {

@@ -36,16 +36,39 @@ func NewHelper(dbname string) Helper {
 	}
 }
 
+func Insert(sql string, args ...interface{}) (lastInsterId int64, err error) {
+	h := NewHelper("default")
+	return h.Insert(sql, args...)
+}
+
+func Update(sql string, args ...interface{}) (rowsAffected int64, err error) {
+	h := NewHelper("default")
+	return h.Update(sql, args...)
+}
+
+func Delete(sql string, args ...interface{}) (rowsAffected int64, err error) {
+	h := NewHelper("default")
+	return h.Delete(sql, args...)
+}
+
+func Count(sql string, args ...interface{}) (c int64, err error) {
+	h := NewHelper("default")
+	return h.Count(sql, args...)
+}
+
+func IsExists(sql string, args ...interface{}) (ok bool, err error) {
+	h := NewHelper("default")
+	return h.IsExists(sql, args...)
+}
+
 func Get(sql string, args ...interface{}) (Row, error) {
 	h := NewHelper("default")
-	row, err := h.Get(sql, args...)
-	return row, err
+	return h.Get(sql, args...)
 }
 
 func Query(sql string, args ...interface{}) ([]Row, error) {
 	h := NewHelper("default")
-	rows, err := h.Query(sql, args...)
-	return rows, err
+	return h.Query(sql, args...)
 }
 
 func QueryPage(page *Page, sql string, args ...interface{}) error {
