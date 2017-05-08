@@ -54,7 +54,7 @@ func (h *DBHelper) Get(sql string, args ...interface{}) (Row, error) {
 		return nil, err
 	}
 	if len(rows) == 0 {
-		return nil, err
+		return nil, errors.New("not found row")
 	}
 	return rows[0], nil
 }
