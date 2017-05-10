@@ -41,7 +41,7 @@ func (h *DBHelper) Update(sql string, args ...interface{}) (rowsAffected int64, 
 }
 
 func (h *DBHelper) Delete(sql string, args ...interface{}) (rowsAffected int64, err error) {
-	return h.Update(sql, args)
+	return h.Update(sql, args...)
 }
 
 func (h *DBHelper) Get(sql string, args ...interface{}) (Row, error) {
