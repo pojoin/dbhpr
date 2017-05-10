@@ -12,6 +12,10 @@ const (
 type Row map[string]interface{}
 
 func (r Row) GetInt64(col string) int64 {
+	value := r[col]
+	if v, ok := value.(int); ok {
+		return int64(v)
+	}
 	v, _ := r[col].(int64)
 	return v
 }
