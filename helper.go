@@ -1,6 +1,9 @@
 package dbhpr
 
-import "time"
+import (
+	"errors"
+	"time"
+)
 
 const (
 	timeFormart = "2006-01-02 15:04:05"
@@ -20,6 +23,15 @@ func (r Row) GetInt(col string) int {
 func (r Row) GetString(col string) string {
 	v, _ := r[col].(string)
 	return v
+}
+
+func (r Row) Append(col string, v interface{}) error {
+	m := map[string]interface{}(r)
+	if _, ok := m[col]; ok {
+		return errors.New("Append [" + col + "] is exists")
+	}
+	m[col] = v
+	return nil
 }
 
 type Time time.Time
