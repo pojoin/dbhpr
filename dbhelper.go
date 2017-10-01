@@ -95,8 +95,14 @@ func (h *DBHelper) Query(sql string, args ...interface{}) ([]Row, error) {
 					row[t.Name()] = string(v)
 				case time.Time:
 					row[t.Name()] = Time(v)
+				case float32:
+					row[t.Name()] = float32(v)
+				case float64:
+					row[t.Name()] = float64(v)
+				case nil:
+					row[t.Name()] = ""
 				default:
-					fmt.Println("数据库类型非 数字，字符串，时间,使用请自行转换")
+					//fmt.Println("数据库类型非 数字，字符串，时间,使用请自行转换")
 					row[t.Name()] = values[i]
 				}
 			} else {
@@ -187,8 +193,14 @@ func (h *DBHelper) QueryPage(page *Page, sql string, args ...interface{}) error 
 					row[t.Name()] = string(v)
 				case time.Time:
 					row[t.Name()] = Time(v)
+				case float32:
+					row[t.Name()] = float32(v)
+				case float64:
+					row[t.Name()] = float64(v)
+				case nil:
+					row[t.Name()] = ""
 				default:
-					fmt.Println("数据库类型非 数字，字符串，时间,使用请自行转换")
+					//fmt.Println("数据库类型非 数字，字符串，时间,使用请自行转换")
 					row[t.Name()] = values[i]
 				}
 			} else {
