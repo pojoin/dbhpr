@@ -126,7 +126,7 @@ func (h *DBHelper) IsExists(sql string, args ...interface{}) (ok bool, err error
 }
 
 func (h *DBHelper) Count(sql string, args ...interface{}) (c int64, err error) {
-	if tmpsql := strings.ToUpper(sql); !strings.Contains(tmpsql, "COUNT") {
+	if tmpsql := strings.ToUpper(sql); !strings.Contains(tmpsql, "COUNT(") {
 		if fromIndex := strings.Index(tmpsql, "FROM"); fromIndex > 0 {
 			sql = fmt.Sprintf("select count(*) %s", []byte(sql)[fromIndex:])
 		}
