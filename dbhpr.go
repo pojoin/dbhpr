@@ -36,6 +36,11 @@ func NewHelper(dbname string) Helper {
 	}
 }
 
+func Exec(sql string, args ...interface{}) (rowsAffected int64, err error) {
+	h := NewHelper("default")
+	return h.Exec(sql, args...)
+}
+
 func Insert(sql string, args ...interface{}) (lastInsterId int64, err error) {
 	h := NewHelper("default")
 	return h.Insert(sql, args...)

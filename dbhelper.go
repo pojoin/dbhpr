@@ -12,6 +12,20 @@ type DBHelper struct {
 	dbname string
 }
 
+func (h *DBHelper) Exec(sql string, args ...interface{}) (rowsAffected int64, err error) {
+	stmt, err := dbHive[h.dbname].Prepare(sql)
+	if err != nil {
+		return 0, err
+	}
+	defer stmt.Close()
+	r, err := stmt.Exec(args...)
+	if err != nil {
+		return 0, err
+	}
+	rowsAffected, err = r.RowsAffected()
+	return
+}
+
 func (h *DBHelper) Insert(sql string, args ...interface{}) (lastInsterId int64, err error) {
 	stmt, err := dbHive[h.dbname].Prepare(sql)
 	if err != nil {
@@ -126,10 +140,14 @@ func (h *DBHelper) IsExists(sql string, args ...interface{}) (ok bool, err error
 }
 
 func (h *DBHelper) Count(sql string, args ...interface{}) (c int64, err error) {
-	if tmpsql := strings.ToUpper(sql); !strings.Contains(tmpsql, "COUNT(") {
-		if fromIndex := strings.Index(tmpsql, "FROM"); fromIndex > 0 {
-			sql = fmt.Sprintf("select count(*) %s", []byte(sql)[fromIndex:])
-		}
+	// if tmpsql := strings.ToUpper(sql); !strings.Contains(tmpsql, "COUNT(") {
+	// 	if fromIndex := strings.Index(tmpsql, "FROM"); fromIndex > 0 {
+	// 		sql = fmt.Sprintf("select count(*) %s", []byte(sql)[fromIndex:])
+	// 	}
+	// }
+	tmpsql := strings.ToUpper(sql)
+	if fromIndex := strings.Index(tmpsql, "FROM"); fromIndex > 0 {
+		sql = fmt.Sprintf("select count(*) %s", []byte(sql)[fromIndex:])
 	}
 	r := dbHive[h.dbname].QueryRow(sql, args...)
 	err = r.Scan(&c)
@@ -149,11 +167,12 @@ func (h *DBHelper) QueryPage(page *Page, sql string, args ...interface{}) error 
 	}
 
 	//sql limit
-	if !strings.Contains(strings.ToUpper(sql), "LIMIT") {
-		sql = fmt.Sprintf("%s limit %d,%d", sql, page.StartRow(), page.PageSize)
-	} else {
-		return errors.New("QueryPage [" + sql + "] contains limit")
-	}
+	// if !strings.Contains(strings.ToUpper(sql), "LIMIT") {
+	// 	sql = fmt.Sprintf("%s limit %d,%d", sql, page.StartRow(), page.PageSize)
+	// } else {
+	// 	return errors.New("QueryPage [" + sql + "] contains limit")
+	// }
+	sql = fmt.Sprintf("%s limit %d,%d", sql, page.StartRow(), page.PageSize)
 
 	//stmt
 	stmt, err := dbHive[h.dbname].Prepare(sql)

@@ -54,7 +54,12 @@ func (t Time) MarshalJSON() ([]byte, error) {
 	return b, nil
 }
 
+func (t Time) String() string {
+	return time.Time(t).Format(timeFormart)
+}
+
 type Helper interface {
+	Exec(sql string, args ...interface{}) (rowsAffected int64, err error)
 	Insert(sql string, args ...interface{}) (lastInsterId int64, err error)
 	Update(sql string, args ...interface{}) (rowsAffected int64, err error)
 	Delete(sql string, args ...interface{}) (rowsAffected int64, err error)
