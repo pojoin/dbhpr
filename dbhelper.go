@@ -1,8 +1,10 @@
 package dbhpr
 
 import (
+	Sql "database/sql"
 	"errors"
 	"fmt"
+	"log"
 	"reflect"
 	"strings"
 	"time"
@@ -93,38 +95,87 @@ func (h *DBHelper) Query(sql string, args ...interface{}) ([]Row, error) {
 		row := make(map[string]interface{})
 		values := make([]interface{}, 0, len(columnTypes))
 		for _, t := range columnTypes {
-			//fmt.Println("name=", t.Name(), ",type=", t.ScanType(), ",databaseTypeName=", t.DatabaseTypeName())
-			values = append(values, reflect.New(t.ScanType()).Interface())
+			// fmt.Println("name=", t.Name(), ",type=", t.ScanType(), ",databaseTypeName=", t.DatabaseTypeName(), t.ScanType())
+			switch t.DatabaseTypeName() {
+			case "CHAR", "VARCHAR", "TINYTEXT", "TEXT", "MEDIUMTEXT", "LONGTEXT":
+				values = append(values, new(Sql.NullString))
+			case "INT", "TINYINT", "SMALLINT", "MEDIUMINT", "BIGINT":
+				values = append(values, new(Sql.NullInt64))
+			case "FLOAT", "DOUBLE", "DECIMAL":
+				values = append(values, new(Sql.NullFloat64))
+			case "DATETIME", "TIMESTAMP":
+				values = append(values, new(time.Time))
+			default:
+				values = append(values, reflect.New(t.ScanType()).Interface())
+			}
 		}
 		err := rows.Scan(values...)
 		if err != nil {
 			return nil, err
 		}
 		for i, t := range columnTypes {
-			if ptr, ok := values[i].(*interface{}); ok {
-				switch v := (*ptr).(type) {
-				case int64:
-					row[t.Name()] = v
-				case []byte:
-					row[t.Name()] = string(v)
-				case time.Time:
-					row[t.Name()] = Time(v)
-				case float32:
-					row[t.Name()] = float32(v)
-				case float64:
-					row[t.Name()] = float64(v)
-				case nil:
-					row[t.Name()] = ""
-				default:
-					//fmt.Println("数据库类型非 数字，字符串，时间,使用请自行转换")
-					row[t.Name()] = values[i]
-				}
-			} else {
+			ptr := values[i]
+			log.Println(t.Name(), "==", reflect.TypeOf(ptr))
+			switch v := (ptr).(type) {
+			case *Sql.NullString:
+				row[t.Name()] = v.String
+			case *Sql.NullInt64:
+				row[t.Name()] = v.Int64
+			case *Sql.NullFloat64:
+				row[t.Name()] = v.Float64
+			case *int64:
+				row[t.Name()] = v
+			case Sql.RawBytes:
+				row[t.Name()] = string(v)
+			case []byte:
+				row[t.Name()] = string(v)
+			case time.Time:
+				row[t.Name()] = Time(v)
+			case *float32:
+				row[t.Name()] = float32(*v)
+			case *float64:
+				row[t.Name()] = float64(*v)
+			case nil:
+				row[t.Name()] = ""
+			default:
+				//fmt.Println("数据库类型非 数字，字符串，时间,使用请自行转换")
 				row[t.Name()] = values[i]
 			}
+			// if ptr, ok := values[i].(*interface{}); ok {
+			// 	log.Println(t.Name(), "==", reflect.TypeOf(*ptr))
+
+			// 	switch v := (*ptr).(type) {
+			// 	case Sql.NullString:
+			// 		row[t.Name()] = v.String
+			// 	case Sql.NullInt64:
+			// 		row[t.Name()] = v.Int64
+			// 	case Sql.NullFloat64:
+			// 		row[t.Name()] = v.Float64
+			// 	case int64:
+			// 		row[t.Name()] = v
+			// 	case Sql.RawBytes:
+			// 		row[t.Name()] = string(v)
+			// 	case []byte:
+			// 		row[t.Name()] = string(v)
+			// 	case time.Time:
+			// 		row[t.Name()] = Time(v)
+			// 	case float32:
+			// 		row[t.Name()] = float32(v)
+			// 	case float64:
+			// 		row[t.Name()] = float64(v)
+			// 	case nil:
+			// 		row[t.Name()] = ""
+			// 	default:
+			// 		//fmt.Println("数据库类型非 数字，字符串，时间,使用请自行转换")
+			// 		row[t.Name()] = values[i]
+			// 	}
+			// } else {
+			// 	row[t.Name()] = values[i]
+			// }
 		}
 		results = append(results, row)
 	}
+	log.Println(results)
 	return results, nil
 }
 

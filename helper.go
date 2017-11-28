@@ -2,6 +2,7 @@ package dbhpr
 
 import (
 	"errors"
+	"log"
 	"time"
 )
 
@@ -24,8 +25,31 @@ func (r Row) GetInt(col string) int {
 	return int(r.GetInt64(col))
 }
 
+func (r Row) GetFloat64(col string) float64 {
+	value := r[col]
+	switch v := value.(type) {
+	case *float64:
+		return *v
+	case float64:
+		return v
+	}
+	if v, ok := value.(float64); ok {
+		return float64(v)
+	}
+	v, _ := r[col].(float64)
+	return v
+}
+
 func (r Row) GetString(col string) string {
-	v, _ := r[col].(string)
+	value := r[col]
+	switch v := value.(type) {
+	case *string:
+		return *v
+	case string:
+		return v
+	}
+	v, ok := r[col].(string)
+	log.Println(ok)
 	return v
 }
 
