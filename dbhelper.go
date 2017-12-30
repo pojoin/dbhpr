@@ -146,7 +146,7 @@ func (h *DBHelper) Count(sql string, args ...interface{}) (c int64, err error) {
 	// 	}
 	// }
 	tmpsql := strings.ToUpper(sql)
-	if fromIndex := strings.Index(tmpsql, "FROM"); fromIndex > 0 {
+	if fromIndex := strings.Index(tmpsql, "FROM "); fromIndex > 0 {
 		sql = fmt.Sprintf("select count(*) %s", []byte(sql)[fromIndex:])
 	}
 	r := dbHive[h.dbname].QueryRow(sql, args...)
