@@ -1,7 +1,6 @@
 package dbhpr
 
 import (
-	"errors"
 	"fmt"
 	"reflect"
 	"strings"
@@ -68,12 +67,13 @@ func (h *DBHelper) Get(sql string, args ...interface{}) (Row, error) {
 		return nil, err
 	}
 	if len(rows) == 0 {
-		return nil, errors.New("not found row")
+		return nil, NotFoundError
 	}
 	return rows[0], nil
 }
 
 func (h *DBHelper) Query(sql string, args ...interface{}) ([]Row, error) {
+	// fmt.Println("sql = ", sql, args)
 	stmt, err := dbHive[h.dbname].Prepare(sql)
 	if err != nil {
 		return nil, err

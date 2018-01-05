@@ -8,6 +8,8 @@ import (
 
 var dbHive map[string]*sql.DB = make(map[string]*sql.DB)
 
+var NotFoundError error = errors.New("not found row")
+
 func NewDB(dbname, driverName, url string) error {
 	db, err := sql.Open(driverName, url)
 	if err != nil {
