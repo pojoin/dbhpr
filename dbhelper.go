@@ -3,6 +3,7 @@ package dbhpr
 import (
 	bsql "database/sql"
 	"fmt"
+	"log"
 	"reflect"
 	"strings"
 	"time"
@@ -141,6 +142,7 @@ func (h *DBHelper) Query(sql string, args ...interface{}) ([]Row, error) {
 		}
 		results = append(results, row)
 	}
+	log.Println(results)
 	return results, nil
 }
 
