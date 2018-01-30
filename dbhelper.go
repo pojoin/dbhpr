@@ -1,6 +1,7 @@
 package dbhpr
 
 import (
+	bsql "database/sql"
 	"fmt"
 	"reflect"
 	"strings"
@@ -93,35 +94,50 @@ func (h *DBHelper) Query(sql string, args ...interface{}) ([]Row, error) {
 		row := make(map[string]interface{})
 		values := make([]interface{}, 0, len(columnTypes))
 		for _, t := range columnTypes {
-			//fmt.Println("name=", t.Name(), ",type=", t.ScanType(), ",databaseTypeName=", t.DatabaseTypeName())
+			// fmt.Println("name=", t.Name(), ",type=", t.ScanType(), ",databaseTypeName=", t.DatabaseTypeName())
 			values = append(values, reflect.New(t.ScanType()).Interface())
 		}
 		err := rows.Scan(values...)
 		if err != nil {
 			return nil, err
 		}
+
 		for i, t := range columnTypes {
-			if ptr, ok := values[i].(*interface{}); ok {
-				switch v := (*ptr).(type) {
-				case int64:
-					row[t.Name()] = v
-				case []byte:
-					row[t.Name()] = string(v)
-				case time.Time:
-					row[t.Name()] = Time(v)
-				case float32:
-					row[t.Name()] = float32(v)
-				case float64:
-					row[t.Name()] = float64(v)
-				case nil:
-					row[t.Name()] = ""
-				default:
-					//fmt.Println("数据库类型非 数字，字符串，时间,使用请自行转换")
-					row[t.Name()] = values[i]
+			value := reflect.Indirect(reflect.ValueOf(values[i])).Interface()
+			// fmt.Println(reflect.TypeOf(value))
+			switch v := value.(type) {
+			case bsql.RawBytes:
+				row[t.Name()] = string(v)
+			case bsql.NullInt64:
+				if v.Valid {
+					row[t.Name()] = v.Int64
+				} else {
+					row[t.Name()] = 0
 				}
-			} else {
-				row[t.Name()] = values[i]
+			case bsql.NullBool:
+				if v.Valid {
+					row[t.Name()] = v.Bool
+				} else {
+					row[t.Name()] = false
+				}
+			case bsql.NullFloat64:
+				if v.Valid {
+					row[t.Name()] = v.Float64
+				} else {
+					row[t.Name()] = 0.0
+				}
+			case bsql.NullString:
+				if v.Valid {
+					row[t.Name()] = v.String
+				} else {
+					row[t.Name()] = ""
+				}
+			case time.Time:
+				row[t.Name()] = Time(v)
+			default:
+				row[t.Name()] = v
 			}
+
 		}
 		results = append(results, row)
 	}
@@ -196,35 +212,50 @@ func (h *DBHelper) QueryPage(page *Page, sql string, args ...interface{}) error 
 		row := make(map[string]interface{})
 		values := make([]interface{}, 0, len(columnTypes))
 		for _, t := range columnTypes {
-			//fmt.Println("name=", t.Name(), ",type=", t.ScanType(), ",databaseTypeName=", t.DatabaseTypeName())
+			// fmt.Println("name=", t.Name(), ",type=", t.ScanType(), ",databaseTypeName=", t.DatabaseTypeName())
 			values = append(values, reflect.New(t.ScanType()).Interface())
 		}
 		err := rows.Scan(values...)
 		if err != nil {
 			return err
 		}
+
 		for i, t := range columnTypes {
-			if ptr, ok := values[i].(*interface{}); ok {
-				switch v := (*ptr).(type) {
-				case int64:
-					row[t.Name()] = v
-				case []byte:
-					row[t.Name()] = string(v)
-				case time.Time:
-					row[t.Name()] = Time(v)
-				case float32:
-					row[t.Name()] = float32(v)
-				case float64:
-					row[t.Name()] = float64(v)
-				case nil:
-					row[t.Name()] = ""
-				default:
-					//fmt.Println("数据库类型非 数字，字符串，时间,使用请自行转换")
-					row[t.Name()] = values[i]
+			value := reflect.Indirect(reflect.ValueOf(values[i])).Interface()
+			// fmt.Println(reflect.TypeOf(value))
+			switch v := value.(type) {
+			case bsql.RawBytes:
+				row[t.Name()] = string(v)
+			case bsql.NullInt64:
+				if v.Valid {
+					row[t.Name()] = v.Int64
+				} else {
+					row[t.Name()] = 0
 				}
-			} else {
-				row[t.Name()] = values[i]
+			case bsql.NullBool:
+				if v.Valid {
+					row[t.Name()] = v.Bool
+				} else {
+					row[t.Name()] = false
+				}
+			case bsql.NullFloat64:
+				if v.Valid {
+					row[t.Name()] = v.Float64
+				} else {
+					row[t.Name()] = 0.0
+				}
+			case bsql.NullString:
+				if v.Valid {
+					row[t.Name()] = v.String
+				} else {
+					row[t.Name()] = ""
+				}
+			case time.Time:
+				row[t.Name()] = Time(v)
+			default:
+				row[t.Name()] = v
 			}
+
 		}
 		results = append(results, row)
 	}
