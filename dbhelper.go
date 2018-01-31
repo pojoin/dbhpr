@@ -3,10 +3,11 @@ package dbhpr
 import (
 	bsql "database/sql"
 	"fmt"
-	"log"
 	"reflect"
 	"strings"
 	"time"
+
+	"github.com/go-sql-driver/mysql"
 )
 
 type DBHelper struct {
@@ -135,6 +136,12 @@ func (h *DBHelper) Query(sql string, args ...interface{}) ([]Row, error) {
 				}
 			case time.Time:
 				row[t.Name()] = Time(v)
+			case mysql.NullTime:
+				if v.Valid {
+					row[t.Name()] = Time(v.Time)
+				} else {
+					row[t.Name()] = ""
+				}
 			default:
 				row[t.Name()] = v
 			}
@@ -142,7 +149,6 @@ func (h *DBHelper) Query(sql string, args ...interface{}) ([]Row, error) {
 		}
 		results = append(results, row)
 	}
-	log.Println(results)
 	return results, nil
 }
 
@@ -254,6 +260,12 @@ func (h *DBHelper) QueryPage(page *Page, sql string, args ...interface{}) error 
 				}
 			case time.Time:
 				row[t.Name()] = Time(v)
+			case mysql.NullTime:
+				if v.Valid {
+					row[t.Name()] = Time(v.Time)
+				} else {
+					row[t.Name()] = ""
+				}
 			default:
 				row[t.Name()] = v
 			}

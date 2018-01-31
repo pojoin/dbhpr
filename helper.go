@@ -12,12 +12,20 @@ const (
 type Row map[string]interface{}
 
 func (r Row) GetInt64(col string) int64 {
-	value := r[col]
-	if v, ok := value.(int); ok {
-		return int64(v)
+	var value int64
+	switch v := r[col].(type) {
+	case int8:
+		value = int64(v)
+	case int16:
+		value = int64(v)
+	case int32:
+		value = int64(v)
+	case int:
+		value = int64(v)
+	case int64:
+		value = v
 	}
-	v, _ := r[col].(int64)
-	return v
+	return value
 }
 
 func (r Row) GetInt(col string) int {
