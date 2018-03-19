@@ -79,6 +79,17 @@ func (r Row) GetString(col string) string {
 	return v
 }
 
+func (r Row) GetFloat64(col string) float64 {
+	var value float64
+	switch v := r[col].(type) {
+	case float32:
+		value = float64(v)
+	case float64:
+		value = float64(v)
+	}
+	return value
+}
+
 func (r Row) Append(col string, v interface{}) error {
 	m := map[string]interface{}(r)
 	if _, ok := m[col]; ok {
